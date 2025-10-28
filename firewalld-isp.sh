@@ -7,6 +7,8 @@ firewall-cmd --permanent --add-masquerade
 firewall-cmd --permanent --zone=trusted --add-interface=enp7s2
 firewall-cmd --permanent --zone=trusted --add-interface=enp7s3
 
+firewall-cmd --reload
+firewall-cmd --list-all
 
 #forwarding
 vim /etc/net/sysctl.conf
@@ -15,3 +17,4 @@ vim /etc/net/sysctl.conf
 
 sysctl -p
 sysctl net.ipv4.ip_forward
+
