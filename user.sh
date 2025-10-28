@@ -100,11 +100,6 @@ setup_sshuser() {
     # Install sudo if needed
     install_sudo
     
-    # Configure passwordless sudo for wheel group
-    if ! grep -q "^%wheel" /etc/sudoers; then
-        echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-    fi
-    
     # Also create separate file for reliability
     echo "sshuser ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/sshuser
     chmod 440 /etc/sudoers.d/sshuser
@@ -118,19 +113,8 @@ setup_net_admin() {
     
     # Create user and add to wheel group
     useradd -m -s /bin/bash -G wheel net_admin
-    if [[ $? -eq 0 ]]; then
-        echo "User net_admin created and added to wheel group"
-    else
-        # If wheel group doesn't exist, create it
-        groupadd wheel
-        useradd -m -s /bin/bash -G wheel net_admin
-        if [[ $? -eq 0 ]]; then
-            echo "User net_admin created and added to wheel group"
-        else
-            echo "Error creating net_admin user"
-            return 1
-        fi
-    fi
+    echo "net_admin ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/net_admin
+    chmod 440 /etc/sudoers.d/sshuser
     
     # Set password
     echo "net_admin:P@ssw0rd" | chpasswd
