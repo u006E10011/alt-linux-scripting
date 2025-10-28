@@ -1,34 +1,58 @@
 #!/bin/bash
 
-# Скрипт для настройки пользователей и SSH на ALT Linux 10.4
-# Проверяем, выполняется ли скрипт с правами root
+# Script for configuring users and SSH on ALT Linux 10.4
+# Check if script is running with root privileges
 if [[ $EUID -ne 0 ]]; then
-   echo "Этот скрипт должен быть запущен с правами root" 
+   echo "This script must be run as root" 
    exit 1
 fi
 
-# Функция установки sudo
+# Function to install SSH
+install_ssh() {
+    if ! command -v sshd &> /dev/null && ! command -v ssh &> /dev/null; then
+        echo "SSH is not installed. Installing..."
+        apt-get update
+        apt-get install -y openssh-server
+        if [[ $? -ne 0 ]]; then
+            echo "Error installing SSH"
+            return 1
+        fi
+        
+        # Enable and start SSH service
+        if systemctl enable sshd 2>/dev/null; then
+            systemctl start sshd
+        elif systemctl enable ssh 2>/dev/null; then
+            systemctl start ssh
+        fi
+        echo "SSH installed and service started"
+    else
+        echo "SSH is already installed"
+    fi
+    return 0
+}
+
+# Function to install sudo
 install_sudo() {
     if ! command -v sudo &> /dev/null; then
-        echo "Установка sudo..."
+        echo "Installing sudo..."
         apt-get update
         apt-get install -y sudo
         if [[ $? -ne 0 ]]; then
-            echo "Ошибка при установке sudo"
+            echo "Error installing sudo"
             return 1
         fi
     fi
     
-    # Проверяем наличие директории sudoers.d
+    # Check if sudoers.d directory exists
     if [[ ! -d /etc/sudoers.d ]]; then
         mkdir -p /etc/sudoers.d
     fi
     return 0
 }
 
-# Функция для определения типа устройства
+# Function to detect device type
 detect_device_type() {
-    # Проверяем hostname для определения типа устройства
+    # Check hostname to determine device type
     local hostname=$(hostname | tr '[:upper:]' '[:lower:]')
     
     case $hostname in
@@ -44,104 +68,107 @@ detect_device_type() {
     esac
 }
 
-# Функция создания пользователя sshuser (для серверов)
+# Function to create sshuser (for servers)
 setup_sshuser() {
-    echo "Настройка пользователя sshuser..."
+    echo "Configuring sshuser..."
     
-    # Создаем пользователя с указанным UID и добавляем в группу wheel
+    # Create user with specified UID and add to wheel group
     useradd -m -u 2026 -s /bin/bash -G wheel sshuser
     if [[ $? -eq 0 ]]; then
-        echo "Пользователь sshuser создан и добавлен в группу wheel"
+        echo "User sshuser created and added to wheel group"
     else
-        # Если группа wheel не существует, создаем ее
+        # If wheel group doesn't exist, create it
         groupadd wheel
         useradd -m -u 2026 -s /bin/bash -G wheel sshuser
         if [[ $? -eq 0 ]]; then
-            echo "Пользователь sshuser создан и добавлен в группу wheel"
+            echo "User sshuser created and added to wheel group"
         else
-            echo "Ошибка при создании пользователя sshuser"
+            echo "Error creating sshuser"
             return 1
         fi
     fi
     
-    # Устанавливаем пароль
+    # Set password
     echo "sshuser:P@ssw0rd" | chpasswd
     if [[ $? -eq 0 ]]; then
-        echo "Пароль для sshuser установлен"
+        echo "Password for sshuser set"
     else
-        echo "Ошибка при установке пароля для sshuser"
+        echo "Error setting password for sshuser"
         return 1
     fi
     
-    # Устанавливаем sudo если нужно
+    # Install sudo if needed
     install_sudo
     
-    # Настраиваем sudo без пароля для группы wheel
+    # Configure passwordless sudo for wheel group
     if ! grep -q "^%wheel" /etc/sudoers; then
         echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
     fi
     
-    # Также создаем отдельный файл для надежности
+    # Also create separate file for reliability
     echo "sshuser ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/sshuser
     chmod 440 /etc/sudoers.d/sshuser
     
-    echo "Настройки sudo для sshuser применены"
+    echo "Sudo settings for sshuser applied"
 }
 
-# Функция создания пользователя net_admin (для маршрутизаторов)
+# Function to create net_admin user (for routers)
 setup_net_admin() {
-    echo "Настройка пользователя net_admin..."
+    echo "Configuring net_admin user..."
     
-    # Создаем пользователя и добавляем в группу wheel
+    # Create user and add to wheel group
     useradd -m -s /bin/bash -G wheel net_admin
     if [[ $? -eq 0 ]]; then
-        echo "Пользователь net_admin создан и добавлен в группу wheel"
+        echo "User net_admin created and added to wheel group"
     else
-        # Если группа wheel не существует, создаем ее
+        # If wheel group doesn't exist, create it
         groupadd wheel
         useradd -m -s /bin/bash -G wheel net_admin
         if [[ $? -eq 0 ]]; then
-            echo "Пользователь net_admin создан и добавлен в группу wheel"
+            echo "User net_admin created and added to wheel group"
         else
-            echo "Ошибка при создании пользователя net_admin"
+            echo "Error creating net_admin user"
             return 1
         fi
     fi
     
-    # Устанавливаем пароль
+    # Set password
     echo "net_admin:P@ssw0rd" | chpasswd
     if [[ $? -eq 0 ]]; then
-        echo "Пароль для net_admin установлен"
+        echo "Password for net_admin set"
     else
-        echo "Ошибка при установке пароля для net_admin"
+        echo "Error setting password for net_admin"
         return 1
     fi
     
-    # Устанавливаем sudo если нужно
+    # Install sudo if needed
     install_sudo
     
-    # Настраиваем sudo без пароля для группы wheel
+    # Configure passwordless sudo for wheel group
     if ! grep -q "^%wheel" /etc/sudoers; then
         echo "%wheel ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
     fi
     
-    # Также создаем отдельный файл для надежности
+    # Also create separate file for reliability
     echo "net_admin ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/net_admin
     chmod 440 /etc/sudoers.d/net_admin
     
-    echo "Настройки sudo для net_admin применены"
+    echo "Sudo settings for net_admin applied"
 }
 
-# Функция настройки SSH для серверов
+# Function to configure SSH for servers
 setup_ssh_server() {
-    echo "Настройка SSH для сервера..."
+    echo "Configuring SSH for server..."
     
-    # Создаем бэкап оригинального конфига
+    # Install SSH if not present
+    install_ssh
+    
+    # Create backup of original config
     cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup 2>/dev/null || true
     
-    # Настраиваем SSH с баннером
+    # Configure SSH with banner
     cat > /etc/ssh/sshd_config << 'EOF'
-# Базовые настройки
+# Basic settings
 Port 2026
 Protocol 2
 PermitRootLogin no
@@ -149,45 +176,49 @@ MaxAuthTries 2
 ClientAliveInterval 300
 ClientAliveCountMax 2
 
-# Аутентификация
+# Authentication
 PubkeyAuthentication yes
 AuthorizedKeysFile .ssh/authorized_keys
 PasswordAuthentication yes
 PermitEmptyPasswords no
 
-# Безопасность
+# Security
 AllowUsers sshuser
 Banner /etc/ssh/banner
 EOF
 
-    # Создаем баннер только для серверов
+    # Create banner only for servers
+    mkdir -p /etc/ssh
     echo "Authorized access only" > /etc/ssh/banner
     chmod 644 /etc/ssh/banner
-    echo "Баннер 'Authorized access only' установлен"
+    echo "Banner 'Authorized access only' set"
     
-    # Перезапускаем SSH службу
+    # Restart SSH service
     if systemctl restart sshd 2>/dev/null; then
-        echo "SSH служба перезапущена (sshd)"
+        echo "SSH service restarted (sshd)"
     elif systemctl restart ssh 2>/dev/null; then
-        echo "SSH служба перезапущена (ssh)"
+        echo "SSH service restarted (ssh)"
     else
-        echo "Предупреждение: не удалось перезапустить SSH службу автоматически"
-        echo "Пожалуйста, перезапустите SSH службу вручную"
+        echo "Warning: Could not restart SSH service automatically"
+        echo "Please restart SSH service manually"
     fi
     
-    echo "Настройка SSH для сервера завершена"
+    echo "SSH configuration for server completed"
 }
 
-# Функция настройки SSH для маршрутизаторов (без баннера)
+# Function to configure SSH for routers (without banner)
 setup_ssh_router() {
-    echo "Настройка SSH для маршрутизатора..."
+    echo "Configuring SSH for router..."
     
-    # Создаем бэкап оригинального конфига
+    # Install SSH if not present
+    install_ssh
+    
+    # Create backup of original config
     cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup 2>/dev/null || true
     
-    # Настраиваем SSH без баннера
+    # Configure SSH without banner
     cat > /etc/ssh/sshd_config << 'EOF'
-# Базовые настройки
+# Basic settings
 Port 22
 Protocol 2
 PermitRootLogin no
@@ -195,54 +226,54 @@ MaxAuthTries 2
 ClientAliveInterval 300
 ClientAliveCountMax 2
 
-# Аутентификация
+# Authentication
 PubkeyAuthentication yes
 AuthorizedKeysFile .ssh/authorized_keys
 PasswordAuthentication yes
 PermitEmptyPasswords no
 
-# Безопасность
+# Security
 AllowUsers net_admin
 EOF
 
-    # Удаляем баннер если он существует
+    # Remove banner if it exists
     if [[ -f /etc/ssh/banner ]]; then
         rm -f /etc/ssh/banner
-        echo "Баннер удален"
+        echo "Banner removed"
     fi
     
-    # Перезапускаем SSH службу
+    # Restart SSH service
     if systemctl restart sshd 2>/dev/null; then
-        echo "SSH служба перезапущена (sshd)"
+        echo "SSH service restarted (sshd)"
     elif systemctl restart ssh 2>/dev/null; then
-        echo "SSH служба перезапущена (ssh)"
+        echo "SSH service restarted (ssh)"
     else
-        echo "Предупреждение: не удалось перезапустить SSH службу автоматически"
-        echo "Пожалуйста, перезапустите SSH службу вручную"
+        echo "Warning: Could not restart SSH service automatically"
+        echo "Please restart SSH service manually"
     fi
     
-    echo "Настройка SSH для маршрутизатора завершена"
+    echo "SSH configuration for router completed"
 }
 
-# Основная логика скрипта
+# Main script logic
 main() {
-    echo "Определение типа устройства..."
+    echo "Detecting device type..."
     local device_type=$(detect_device_type)
     
     case $device_type in
         "server")
-            echo "Обнаружен сервер. Настраиваю sshuser и SSH..."
+            echo "Server detected. Configuring sshuser and SSH..."
             setup_sshuser
             setup_ssh_server
             ;;
         "router")
-            echo "Обнаружен маршрутизатор. Настраиваю net_admin..."
+            echo "Router detected. Configuring net_admin..."
             setup_net_admin
             setup_ssh_router
             ;;
         "unknown")
-            echo "Тип устройства не определен. Запрос у пользователя..."
-            read -p "Введите тип устройства (server/router): " user_input
+            echo "Device type not determined. Asking user..."
+            read -p "Enter device type (server/router): " user_input
             case $(echo "$user_input" | tr '[:upper:]' '[:lower:]') in
                 "server")
                     setup_sshuser
@@ -253,38 +284,38 @@ main() {
                     setup_ssh_router
                     ;;
                 *)
-                    echo "Неверный тип устройства. Используйте 'server' или 'router'"
+                    echo "Invalid device type. Use 'server' or 'router'"
                     exit 1
                     ;;
             esac
             ;;
     esac
     
-    echo "Настройка завершена!"
+    echo "Configuration completed!"
     
-    # Выводим информацию о настройках
+    # Display configuration summary
     echo ""
-    echo "=== ИТОГИ НАСТРОЙКИ ==="
+    echo "=== CONFIGURATION SUMMARY ==="
     if [[ $device_type == "server" ]] || [[ $(echo "$user_input" | tr '[:upper:]' '[:lower:]') == "server" ]]; then
-        echo "Сервер настроен:"
-        echo "- Пользователь: sshuser (UID: 2026)"
-        echo "- Группа: wheel"
-        echo "- Пароль: P@ssw0rd"
-        echo "- SSH порт: 2026"
-        echo "- Sudo без пароля: разрешено"
-        echo "- Root login: запрещен"
-        echo "- Баннер: 'Authorized access only'"
+        echo "Server configured:"
+        echo "- User: sshuser (UID: 2026)"
+        echo "- Group: wheel"
+        echo "- Password: P@ssw0rd"
+        echo "- SSH port: 2026"
+        echo "- Sudo without password: enabled"
+        echo "- Root login: disabled"
+        echo "- Banner: 'Authorized access only'"
     elif [[ $device_type == "router" ]] || [[ $(echo "$user_input" | tr '[:upper:]' '[:lower:]') == "router" ]]; then
-        echo "Маршрутизатор настроен:"
-        echo "- Пользователь: net_admin"
-        echo "- Группа: wheel"
-        echo "- Пароль: P@ssw0rd" 
-        echo "- SSH порт: 22 (стандартный)"
-        echo "- Sudo без пароля: разрешено"
-        echo "- Баннер: отсутствует"
+        echo "Router configured:"
+        echo "- User: net_admin"
+        echo "- Group: wheel"
+        echo "- Password: P@ssw0rd" 
+        echo "- SSH port: 22 (standard)"
+        echo "- Sudo without password: enabled"
+        echo "- Banner: none"
     fi
-    echo "======================"
+    echo "============================="
 }
 
-# Запуск основной функции
+# Run main function
 main
