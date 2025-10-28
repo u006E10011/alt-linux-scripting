@@ -204,20 +204,15 @@ setup_ssh_router() {
     cat > /etc/ssh/sshd_config << 'EOF'
 # Basic settings
 Port 22
-Protocol 2
+AllowUsers net_admin
 PermitRootLogin no
 MaxAuthTries 2
-ClientAliveInterval 300
-ClientAliveCountMax 2
 
-# Authentication
-PubkeyAuthentication yes
-AuthorizedKeysFile .ssh/authorized_keys
-PasswordAuthentication yes
-PermitEmptyPasswords no
+Subsystem sftp /usr/lib/openssh/sftp-server
 
-# Security
-AllowUsers net_admin
+AcceptEnv LANG LANGUAGE LC_ADDRESS LC_ALL LC_COLLATE LC_CTYPE
+AcceptEnv LC_IDENTIFICATION LC_MEASUREMENT LC_MESSAGES LC_MONETARY
+AcceptEnv LC_NAME LC_NUMERIC LC_PAPER LC_TELEPHONE LC_TiME
 EOF
 
     # Remove banner if it exists
