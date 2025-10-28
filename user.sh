@@ -154,7 +154,7 @@ setup_ssh_server() {
     cat > /etc/openssh/sshd_config << 'EOF'
 # Basic settings
 Port 22
-AllowUsers net_admin
+AllowUsers sshuser
 PermitRootLogin no
 MaxAuthTries 2
 
