@@ -185,19 +185,10 @@ main() {
     echo "SSH user setup script for Alt Linux 10.4"
     echo "========================================="
     
-    # Check and install packages
     check_and_install_packages
-    
-    # Create user
     create_user
-    
-    # Configure sudo
     configure_sudo
-    
-    # Configure SSH
     configure_ssh
-    
-    # Restart SSH service
     restart_ssh_service
     
     echo ""
