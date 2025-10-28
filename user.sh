@@ -148,32 +148,26 @@ setup_ssh_server() {
     install_ssh
     
     # Create backup of original config
-    cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup 2>/dev/null || true
+    cp /etc/openssh/sshd_config /etc/openssh/sshd_config.backup 2>/dev/null || true
     
     # Configure SSH with banner
-    cat > /etc/ssh/sshd_config << 'EOF'
+    cat > /etc/openssh/sshd_config << 'EOF'
 # Basic settings
-Port 2026
-Protocol 2
+Port 22
+AllowUsers net_admin
 PermitRootLogin no
 MaxAuthTries 2
-ClientAliveInterval 300
-ClientAliveCountMax 2
 
-# Authentication
-PubkeyAuthentication yes
-AuthorizedKeysFile .ssh/authorized_keys
-PasswordAuthentication yes
-PermitEmptyPasswords no
+Subsystem sftp /usr/lib/openssh/sftp-server
 
-# Security
-AllowUsers sshuser
-Banner /etc/ssh/banner
+AcceptEnv LANG LANGUAGE LC_ADDRESS LC_ALL LC_COLLATE LC_CTYPE
+AcceptEnv LC_IDENTIFICATION LC_MEASUREMENT LC_MESSAGES LC_MONETARY
+AcceptEnv LC_NAME LC_NUMERIC LC_PAPER LC_TELEPHONE LC_TiME
 EOF
 
     # Create banner only for servers
-    mkdir -p /etc/ssh
-    echo "Authorized access only" > /etc/ssh/banner
+    mkdir -p /etc/openssh
+    echo "Authorized access only" > /etc/openssh/banner
     chmod 644 /etc/ssh/banner
     echo "Banner 'Authorized access only' set"
     
@@ -198,10 +192,10 @@ setup_ssh_router() {
     install_ssh
     
     # Create backup of original config
-    cp /etc/ssh/sshd_config /etc/ssh/sshd_config.backup 2>/dev/null || true
+    cp /etc/openssh/sshd_config /etc/ssh/sshd_config.backup 2>/dev/null || true
     
     # Configure SSH without banner
-    cat > /etc/ssh/sshd_config << 'EOF'
+    cat > /etc/openssh/sshd_config << 'EOF'
 # Basic settings
 Port 22
 AllowUsers net_admin
@@ -217,7 +211,7 @@ EOF
 
     # Remove banner if it exists
     if [[ -f /etc/ssh/banner ]]; then
-        rm -f /etc/ssh/banner
+        rm -f /etc/openssh/banner
         echo "Banner removed"
     fi
     
