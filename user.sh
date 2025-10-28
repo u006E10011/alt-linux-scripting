@@ -153,7 +153,7 @@ setup_ssh_server() {
     # Configure SSH with banner
     cat > /etc/openssh/sshd_config << 'EOF'
 # Basic settings
-Port 22
+Port 2026
 AllowUsers sshuser
 PermitRootLogin no
 MaxAuthTries 2
@@ -197,7 +197,7 @@ setup_ssh_router() {
     # Configure SSH without banner
     cat > /etc/openssh/sshd_config << 'EOF'
 # Basic settings
-Port 22
+Port 2026
 AllowUsers net_admin
 PermitRootLogin no
 MaxAuthTries 2
@@ -270,23 +270,13 @@ main() {
     echo ""
     echo "=== CONFIGURATION SUMMARY ==="
     if [[ $device_type == "server" ]] || [[ $(echo "$user_input" | tr '[:upper:]' '[:lower:]') == "server" ]]; then
-        echo "Server configured:"
-        echo "- User: sshuser (UID: 2026)"
-        echo "- Group: wheel"
-        echo "- Password: P@ssw0rd"
-        echo "- SSH port: 2026"
-        echo "- Sudo without password: enabled"
-        echo "- Root login: disabled"
-        echo "- Banner: 'Authorized access only'"
+        groups sshuser
+        cat /etc/openssh/banner
     elif [[ $device_type == "router" ]] || [[ $(echo "$user_input" | tr '[:upper:]' '[:lower:]') == "router" ]]; then
-        echo "Router configured:"
-        echo "- User: net_admin"
-        echo "- Group: wheel"
-        echo "- Password: P@ssw0rd" 
-        echo "- SSH port: 22 (standard)"
-        echo "- Sudo without password: enabled"
-        echo "- Banner: none"
+        groups net_admin
     fi
+
+    cat /etc/openssh/sshd_config
     echo "============================="
 }
 
