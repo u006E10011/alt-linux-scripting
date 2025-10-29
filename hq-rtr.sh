@@ -74,7 +74,6 @@ setup_interface(){
     echo "$options_vlan" > /etc/net/ifaces/vlan200/options
     echo "VID=200" >> /etc/net/ifaces/vlan200/options
     echo "$options_eth" > /etc/net/ifaces/enp7s2/options
-    systemctl restart network && ip -c a
 }
 
 setup_gre(){
@@ -112,6 +111,12 @@ setup_gre(){
     echo "$options" >> /etc/net/ifaces/gre1/options
 }
 
+setup_all_network(){
+    setup_interface
+    setup_gre
+    systemctl restart network && ip -c a
+}
+
 init
 setup_firewalld
-setup_interface
+setup_all_network
