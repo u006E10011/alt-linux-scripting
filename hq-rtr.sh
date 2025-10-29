@@ -66,7 +66,7 @@ setup_interface(){
     TYPE=vlan
     HOST=enp7s2'
 
-    options_eth='BOOTPROTO=dhcp
+    options_eth='BOOTPROTO=static
     TYPE=eth'
 
     echo "$options_vlan" > /etc/net/ifaces/vlan100/options
