@@ -3,9 +3,26 @@ auto="true"
 init(){
     read -p "is auto [true]: " input
     auto=${input:-true}
-
-    apt-get update && apt-get install firewalld sed -y
-    systemctl enable --now firewalld
+    
+    local packages=("firewalld" "sed")
+    local missing_packages=()
+    
+    for package in "${packages[@]}"; do
+        if ! rpm -q "$package" &>/dev/null; then
+            missing_packages+=("$package")
+        fi
+    done
+    
+    if [ ${#missing_packages[@]} -ne 0 ]; then
+        echo "Installing missing packages: ${missing_packages[*]}"
+        apt-get install -y "${missing_packages[@]}"
+        if [ $? -ne 0 ]; then
+            echo "Error installing packages"
+            exit 1
+        fi
+    else
+        echo "All required packages are already installed"
+    fi
 }
 
 setup_firewalld(){
