@@ -13,17 +13,17 @@ setup_firewalld(){
 }
 
 setup_interface(){
-    enp7s2_default="192.168.1.10/24"
-    enp7s3_default="192.168.1.11/24"
-    
+    enp7s2_default="172.16.1.1/28"
+    enp7s3_default="172.16.2.1/28"
+
     read -p "set enp7s2 address [$enp7s2_default]: " enp7s2
     enp7s2=${enp7s2:-$enp7s2_default}
     read -p "set enp7s3 address [$enp7s3_default]: " enp7s3
     enp7s3=${enp7s3:-$enp7s3_default}
 
-    mkdir /etc/net/iface/enp7s2 /etc/net/iface/enp7s3
-    echo "$enp7s2" > /etc/net/iface/enp7s2/ipv4address
-    echo "$enp7s3" > /etc/net/iface/enp7s3/ipv4address
+    mkdir /etc/net/ifaces/enp7s2 /etc/net/ifaces/enp7s3
+    echo "$enp7s2" > /etc/net/ifaces/enp7s2/ipv4address
+    echo "$enp7s3" > /etc/net/ifaces/enp7s3/ipv4address
 
     options='BOOTPROTO=static
     TYPE=eth
@@ -31,8 +31,8 @@ setup_interface(){
     SYSTEMD_BOOTPROTO=static
     CONFIG_IPV4=yes'
 
-    echo "$options" > /etc/net/iface/enp7s2/options
-    echo "$options" > /etc/net/iface/enp7s3/options
+    echo "$options" > /etc/net/ifaces/enp7s2/options
+    echo "$options" > /etc/net/ifaces/enp7s3/options
 
     systemctl restart network && ip -c a
 }
