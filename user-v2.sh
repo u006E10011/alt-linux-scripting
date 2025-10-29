@@ -105,7 +105,7 @@ configure_sudo() {
 configure_ssh() {
     echo "=== Configuring SSH server ==="
     
-    local sshd_config="/etc/ssh/sshd_config"
+    local sshd_config="/etc/openssh/sshd_config"
     local backup_file="${sshd_config}.backup.$(date +%Y%m%d_%H%M%S)"
     
     # Create backup
