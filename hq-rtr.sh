@@ -62,15 +62,18 @@ setup_interface(){
     echo "$vlan100" > /etc/net/ifaces/vlan100/ipv4address
     echo "$vlan200" > /etc/net/ifaces/vlan200/ipv4address
 
-    options='BOOTPROTO=static
+    options_vlan='BOOTPROTO=static
     TYPE=vlan
     HOST=enp7s2'
 
-    echo "$options" > /etc/net/ifaces/vlan100/options
-    echo "VID=100" >> /etc/net/ifaces/vlan100/options
-    echo "$options" > /etc/net/ifaces/vlan200/options
-    echo "VID=200" >> /etc/net/ifaces/vlan200/options
+    options_eth='BOOTPROTO=dhcp
+    TYPE=eth'
 
+    echo "$options_vlan" > /etc/net/ifaces/vlan100/options
+    echo "VID=100" >> /etc/net/ifaces/vlan100/options
+    echo "$options_vlan" > /etc/net/ifaces/vlan200/options
+    echo "VID=200" >> /etc/net/ifaces/vlan200/options
+    echo "$options_eth" > /etc/net/ifaces/enp7s2/options
     systemctl restart network && ip -c a
 }
 
