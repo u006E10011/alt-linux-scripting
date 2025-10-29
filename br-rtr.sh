@@ -92,7 +92,7 @@ setup_gre(){
     mkdir /etc/net/ifaces/gre1
     echo "$gre" > /etc/net/ifaces/gre1/ipv4address
 
-     options='TUNTYPE=gre
+    options='TUNTYPE=gre
     TYPE=iptun
     TUNTTL=64
     TUNOPTIONS='\''ttl 64'\''
