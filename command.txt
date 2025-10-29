@@ -1,1 +1,2 @@
 HQ-CLI: vim /etc/sudoers -> %hq ALL=(ALL:ALL) NOPASSWD:bin/cat,bin/grep, bin/id
+/etc/resolvconf.conf -> 8.8.8.8
