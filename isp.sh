@@ -23,13 +23,13 @@ setup_interface(){
     enp7s3_default="172.16.2.1/28"
 
     if [[ "$auto" == "false" ]]; then
-        read -p "set enp7s2 address [$enp7s2_default]: " enp7s2_ip
-        enp7s2_ip=${enp7s2_ip:-$enp7s2_default}
-        read -p "set enp7s3 address [$enp7s3_default]: " enp7s3_ip
-        enp7s3_ip=${enp7s3_ip:-$enp7s3_default}
+        read -p "set enp7s2 address [$enp7s2_default]: " enp7s2
+        enp7s2=${enp7s2:-$enp7s2_default}
+        read -p "set enp7s3 address [$enp7s3_default]: " enp7s3
+        enp7s3=${enp7s3:-$enp7s3_default}
     else
-        enp7s2_ip="$enp7s2_default"
-        enp7s3_ip="$enp7s3_default"
+        enp7s2="$enp7s2_default"
+        enp7s3="$enp7s3_default"
     fi
 
     mkdir /etc/net/ifaces/enp7s2 /etc/net/ifaces/enp7s3
