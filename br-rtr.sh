@@ -107,5 +107,6 @@ setup_all_network(){
     systemctl restart network && ip -c a
 }
 
-setup_firewalld
 init
+setup_firewalld
+setup_all_network
