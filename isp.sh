@@ -26,6 +26,7 @@ init(){
 }
 
 setup_firewalld(){
+    systemctl enable --now firewalld
     firewall-cmd --permanent --add-masquerade
     firewall-cmd --permanent --zone=trusted --add-interface=enp7s2
     firewall-cmd --permanent --zone=trusted --add-interface=enp7s3
