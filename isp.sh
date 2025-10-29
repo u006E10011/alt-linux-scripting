@@ -8,13 +8,18 @@ setup_firewalld(){
     firewall-cmd --permanent --zone=trusted --add-interface=enp7s2
     firewall-cmd --permanent --zone=trusted --add-interface=enp7s3
 
-    sed -i 's/net.ipv4.ip_forward = 0/net.ipv4.ip_forward = 1/' /etc/net/sysctl.conf
+    sudo sed -i 's/net.ipv4.ip_forward = 0/net.ipv4.ip_forward = 1/' /etc/net/sysctl.conf
     sysctl net.ipv4.ip_forward
 }
 
 setup_interface(){
-    read -p "set enp7s2 address" enp7s2
-    read -p "set enp7s3 address" enp7s3
+    enp7s2_default="192.168.1.10/24"
+    enp7s3_default="192.168.1.11/24"
+    
+    read -p "set enp7s2 address [$enp7s2_default]: " enp7s2
+    enp7s2=${enp7s2:-$enp7s2_default}
+    read -p "set enp7s3 address [$enp7s3_default]: " enp7s3
+    enp7s3=${enp7s3:-$enp7s3_default}
 
     mkdir /etc/net/iface/enp7s2 /etc/net/iface/enp7s3
     echo "$enp7s2" > /etc/net/iface/enp7s2/ipv4address
