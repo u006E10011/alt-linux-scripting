@@ -135,22 +135,6 @@ configure_ssh() {
     update_config "AllowUsers" "$username" "$sshd_config"
     update_config "PermitRootLogin" "no" "$sshd_config"
     update_config "MaxAuthTries" "2" "$sshd_config"
-    
-    # Check and add Subsystem sftp if needed
-    if ! grep -q "^Subsystem sftp" "$sshd_config"; then
-        echo "Subsystem sftp /usr/lib/ssh/sftp-server" >> "$sshd_config"
-    fi
-    
-    # Check and add AcceptEnv if needed
-    if ! grep -q "^AcceptEnv LANG LANGUAGE" "$sshd_config"; then
-        cat >> "$sshd_config" << 'EOF'
-
-AcceptEnv LANG LANGUAGE LC_ADDRESS LC_ALL LC_COLLATE LC_CTYPE
-AcceptEnv LC_IDENTIFICATION LC_MEASUREMENT LC_MESSAGES LC_MONETARY
-AcceptEnv LC_NAME LC_NUMERIC LC_PAPER LC_TELEPHONE LC_TIME
-EOF
-    fi
-    
     echo "SSH configuration updated successfully"
 }
 
