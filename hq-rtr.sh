@@ -28,6 +28,7 @@ init(){
 }
 
 setup_firewalld(){
+    systemctl enable --now firewalld
     firewall-cmd --permanent --add-masquerade
     firewall-cmd --permanent --add-protocol=ospf
     firewall-cmd --permanent --add-service=dns
