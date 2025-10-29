@@ -6,7 +6,7 @@ init(){
     read -p "is auto [true]: " input
     auto=${input:-true}
     
-    local packages=("firewalld", "sed")
+    local packages=("firewalld" "sed")
     local missing_packages=()
     
     for package in "${packages[@]}"; do
