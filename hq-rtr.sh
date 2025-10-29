@@ -1,0 +1,78 @@
+#!/bin/bash
+
+auto="true"
+
+init(){
+    read -p "is auto [true]: " input
+    auto=${input:-true}
+    
+    local packages=("firewalld", "sed")
+    local missing_packages=()
+    
+    for package in "${packages[@]}"; do
+        if ! rpm -q "$package" &>/dev/null; then
+            missing_packages+=("$package")
+        fi
+    done
+    
+    if [ ${#missing_packages[@]} -ne 0 ]; then
+        echo "Installing missing packages: ${missing_packages[*]}"
+        apt-get install -y "${missing_packages[@]}"
+        if [ $? -ne 0 ]; then
+            echo "Error installing packages"
+            exit 1
+        fi
+    else
+        echo "All required packages are already installed"
+    fi
+}
+
+setup_firewalld(){
+    firewall-cmd --permanent --add-masquerade
+    firewall-cmd --permanent --add-protocol=ospf
+    firewall-cmd --permanent --add-service=dns
+    firewall-cmd --permanent --add-port=53/tcp
+    firewall-cmd --permanent --add-port=53/udp
+    firewall-cmd --permanent --add-port=8080/tcp
+    firewall-cmd --permanent --add-port=8080/udp
+    firewall-cmd --permanent --add-port=2026/tcp
+    firewall-cmd --permanent --add-port=2026/udp
+    firewall-cmd --reload
+
+    sed -i 's/net.ipv4.ip_forward = 0/net.ipv4.ip_forward = 1/' /etc/net/sysctl.conf
+    sysctl net.ipv4.ip_forward
+}
+
+setup_interface(){
+    vlan100_default="192.168.100.1/27"
+    vlan200_default="192.168.200.1/28"
+
+    if [[ "$auto" == "false" ]]; then
+        read -p "set vlan100 address [$vlan100_default]: " vlan100
+        vlan100=${vlan100:-$vlan100_default}
+        read -p "set vlan200 address [$vlan200_default]: " vlan200
+        vlan200=${vlan200:-$vlan200_default}
+    else
+        vlan100="$vlan100_default"
+        vlan200="$vlan200_default"
+    fi
+
+    mkdir /etc/net/ifaces/enp7s2 /etc/net/ifaces/vlan100 /etc/net/ifaces/vlan200
+    echo "$vlan100" > /etc/net/ifaces/vlan100/ipv4address
+    echo "$vlan200" > /etc/net/ifaces/vlan200/ipv4address
+
+    options='BOOTPROTO=static
+    TYPE=vlan
+    HOST=enp7s2'
+
+    echo "$options" > /etc/net/ifaces/vlan100/options
+    echo "VID=100" >> /etc/net/ifaces/vlan100/options
+    echo "$options" > /etc/net/ifaces/vlan200/options
+    echo "VID=200" >> /etc/net/ifaces/vlan200/options
+
+    systemctl restart network && ip -c a
+}
+
+init
+setup_firewalld
+setup_interface
