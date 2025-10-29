@@ -64,9 +64,6 @@ setup_interface(){
     CONFIG_IPV4=yes'
 
     echo "$options" > /etc/net/ifaces/enp7s2/options
-    setup_gre
-
-    systemctl restart network && ip -c a
 }
 
 setup_gre(){
@@ -92,7 +89,7 @@ setup_gre(){
     mkdir /etc/net/ifaces/gre1
     echo "$gre" > /etc/net/ifaces/gre1/ipv4address
 
-    options='TUNTYPE=gre
+     options='TUNTYPE=gre
     TYPE=iptun
     TUNTTL=64
     TUNOPTIONS='\''ttl 64'\''
@@ -104,6 +101,11 @@ setup_gre(){
     echo "$options" >> /etc/net/ifaces/gre1/options
 }
 
-init
+setup_all_network(){
+    setup_interface
+    setup_gre
+    systemctl restart network && ip -c a
+}
+
 setup_firewalld
-setup_interface
+init
