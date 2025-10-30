@@ -6,6 +6,15 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
+# Default port
+DEFAULT_SSH_PORT="2026"
+ssh_port="$DEFAULT_SSH_PORT"
+
+# Banner settings
+banner_enabled=false
+banner_text="Authorized access only"
+banner_file="/etc/openssh/banner"
+
 # Function to check and install packages
 check_and_install_packages() {
     echo "Checking for required packages..."
@@ -29,6 +38,66 @@ check_and_install_packages() {
         fi
     else
         echo "All required packages are already installed"
+    fi
+}
+
+# Function to get SSH port from user
+get_ssh_port() {
+    echo "=== SSH Port Configuration ==="
+    
+    while true; do
+        read -p "Enter SSH port (default: $DEFAULT_SSH_PORT): " port_input
+        
+        if [ -z "$port_input" ]; then
+            ssh_port="$DEFAULT_SSH_PORT"
+            echo "Using default port: $ssh_port"
+            break
+        elif [[ ! "$port_input" =~ ^[0-9]+$ ]]; then
+            echo "Port must be a number!"
+        elif [ "$port_input" -lt 1 ] || [ "$port_input" -gt 65535 ]; then
+            echo "Port must be between 1 and 65535!"
+        elif [ "$port_input" -eq 22 ]; then
+            echo "Warning: Using default SSH port (22). This is less secure."
+            read -p "Are you sure you want to use port 22? (y/N): " confirm
+            if [[ "$confirm" =~ ^[Yy]$ ]]; then
+                ssh_port="$port_input"
+                break
+            fi
+        else
+            ssh_port="$port_input"
+            break
+        fi
+    done
+    
+    echo "SSH port set to: $ssh_port"
+}
+
+# Function to configure banner
+configure_banner() {
+    echo "=== SSH Banner Configuration ==="
+    
+    read -p "Enable SSH banner? (y/N): " enable_banner
+    if [[ "$enable_banner" =~ ^[Yy]$ ]]; then
+        banner_enabled=true
+        
+        read -p "Enter banner text (default: '$banner_text'): " custom_banner
+        if [ -n "$custom_banner" ]; then
+            banner_text="$custom_banner"
+        fi
+        
+        # Create banner file
+        echo "Creating banner file at $banner_file..."
+        echo "$banner_text" > "$banner_file"
+        
+        if [ $? -eq 0 ]; then
+            echo "Banner file created successfully"
+            chmod 644 "$banner_file"
+        else
+            echo "Error creating banner file"
+            exit 1
+        fi
+    else
+        echo "Banner disabled"
     fi
 }
 
@@ -106,11 +175,6 @@ configure_ssh() {
     echo "=== Configuring SSH server ==="
     
     local sshd_config="/etc/openssh/sshd_config"
-    local backup_file="${sshd_config}.backup.$(date +%Y%m%d_%H%M%S)"
-    
-    # Create backup
-    cp "$sshd_config" "$backup_file"
-    echo "Backup created: $backup_file"
     
     # Update or add settings
     echo "Updating SSH configuration..."
@@ -131,10 +195,22 @@ configure_ssh() {
     }
     
     # Update configuration
-    update_config "Port" "2026" "$sshd_config"
+    update_config "Port" "$ssh_port" "$sshd_config"
     update_config "AllowUsers" "$username" "$sshd_config"
     update_config "PermitRootLogin" "no" "$sshd_config"
     update_config "MaxAuthTries" "2" "$sshd_config"
+    
+    # Configure banner if enabled
+    if [ "$banner_enabled" = true ]; then
+        update_config "Banner" "$banner_file" "$sshd_config"
+        echo "SSH banner enabled: $banner_file"
+    else
+        # Remove banner configuration if exists
+        if grep -q "^Banner" "$sshd_config"; then
+            sed -i '/^Banner/d' "$sshd_config"
+        fi
+    fi
+    
     echo "SSH configuration updated successfully"
 }
 
@@ -146,7 +222,10 @@ restart_ssh_service() {
         systemctl restart sshd
         if [ $? -eq 0 ]; then
             echo "SSH service restarted successfully"
-            echo "SSH server now listening on port 2026"
+            echo "SSH server now listening on port $ssh_port"
+            if [ "$banner_enabled" = true ]; then
+                echo "SSH banner enabled: $banner_file"
+            fi
         else
             echo "Error restarting SSH service"
             exit 1
@@ -156,10 +235,27 @@ restart_ssh_service() {
         systemctl enable sshd
         if [ $? -eq 0 ]; then
             echo "SSH service started successfully"
-            echo "SSH server now listening on port 2026"
+            echo "SSH server now listening on port $ssh_port"
+            if [ "$banner_enabled" = true ]; then
+                echo "SSH banner enabled: $banner_file"
+            fi
         else
             echo "Error starting SSH service"
             exit 1
+        fi
+    fi
+}
+
+# Function to check if port is available
+check_port_availability() {
+    if command -v netstat >/dev/null 2>&1; then
+        if netstat -tuln | grep -q ":$ssh_port "; then
+            echo "Warning: Port $ssh_port is already in use by another service!"
+            read -p "Do you want to continue anyway? (y/N): " confirm
+            if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
+                echo "Please choose a different port and run the script again."
+                exit 1
+            fi
         fi
     fi
 }
@@ -170,6 +266,9 @@ main() {
     echo "========================================="
     
     check_and_install_packages
+    get_ssh_port
+    check_port_availability
+    configure_banner
     create_user
     configure_sudo
     configure_ssh
@@ -178,8 +277,13 @@ main() {
     echo ""
     echo "=== Setup completed successfully! ==="
     echo "User: $username"
-    echo "SSH Port: 2026"
-    echo "Connect: ssh -p 2026 $username@$(hostname -I | awk '{print $1}')"
+    echo "SSH Port: $ssh_port"
+    if [ "$banner_enabled" = true ]; then
+        echo "SSH Banner: Enabled ($banner_file)"
+    else
+        echo "SSH Banner: Disabled"
+    fi
+    echo "Connect: ssh -p $ssh_port $username@$(hostname -I | awk '{print $1}')"
     echo "================================"
 }
 
