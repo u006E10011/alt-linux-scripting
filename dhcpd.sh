@@ -57,6 +57,7 @@ main()
     echo "DHCPDARGS=$DHCPDARGS"
     echo "hardware_ethernet=$hardware_ethernet"
     echo "domen=$domen"
+    history -c
 }
 
 main
