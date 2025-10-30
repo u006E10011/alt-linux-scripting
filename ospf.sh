@@ -96,6 +96,7 @@ main()
 {
     init
     setup_config
+    history -c
 }
 
 main "$@"
