@@ -113,30 +113,26 @@ setup_gre(){
 
 setup_ospf()
 {
-    curl -s -o /tmp/ospf.sh "https://raw.githubusercontent.com/u006E100/alt-linux-scripting/main/ospf.sh"
-    chmod +x /tmp/ospf.sh
-    /tmp/ospf.sh --hostname "hq-rtr"
+    curl -s -O "https://raw.githubusercontent.com/u006E100/alt-linux-scripting/main/ospf.sh"
+    bash ospf.sh --hostname "hq-rtr"
 }
 
 setup_dhcp()
 {
-    curl -s -o /tmp/dhcpd.sh "https://raw.githubusercontent.com/u006E100/alt-linux-scripting/main/dhcpd.sh"
-    chmod +x /tmp/dhcpd.sh
-    bash /tmp/dhcpd.sh
+    curl -s -O "https://raw.githubusercontent.com/u006E100/alt-linux-scripting/main/dhcpd.sh"
+    bash dhcpd.sh
 }
 
 setup_all_network(){
     setup_interface
     setup_gre
-    setup_ospf
-    setup_dhcp
     systemctl restart network && ip -c a
 }
 
 dispose()
 {
-    rm -rf /tmp/ospf.sh
-    rm -rf /tmp/dhcpd.sh
+    rm -rf ospf.sh
+    rm -rf dhcpd.sh
     rm -rf hq-rtr.sh
     history -c
 }
@@ -144,4 +140,6 @@ dispose()
 init
 setup_firewalld
 setup_all_network
+setup_ospf
+setup_dhcp
 dispose
