@@ -119,6 +119,7 @@ dispose()
 {
     rm -rf /tmp/ospf.sh
     rm -rf br-rtr.sh
+    history -c
 }
 
 init
