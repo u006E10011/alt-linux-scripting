@@ -1,2 +1,5 @@
 HQ-CLI: vim /etc/sudoers -> %hq ALL=(ALL:ALL) NOPASSWD:bin/cat,bin/grep, bin/id
 /etc/resolvconf.conf -> 8.8.8.8
+
+Скачать без symlink
+ssh -p 2026 sshuser@192.168.100.2 "sudo tar czfh - /var/lib/bind/etc/zone/" > zone-proper.tar.gz
