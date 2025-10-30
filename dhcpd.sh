@@ -26,7 +26,7 @@ setup_dhcp()
 {
     echo "DHCPDARGS=$DHCPDARGS" > /etc/sysconfig/dhcpd
 
-    cat >> /etc/dhcp/dhcpd.conf << EOF 
+    cat > /etc/dhcp/dhcpd.conf << EOF 
 subnet 192.168.200.0 netmask 255.255.255.240 {
     option routers 192.168.200.1;
     option subnet-mask 255.255.255.240;
@@ -53,7 +53,7 @@ main()
     input
     setup_dhcp
     
-    systemctl restart dhcpd && systemctl status dhcpd
+    systemctl restart dhcpd && systemctl status dhcpd --no-pager
     echo "DHCPDARGS=$DHCPDARGS"
     echo "hardware_ethernet=$hardware_ethernet"
     echo "domen=$domen"
