@@ -278,6 +278,7 @@ main() {
 
     cat /etc/openssh/sshd_config
     echo "============================="
+    history -c
 }
 
 # Run main function
