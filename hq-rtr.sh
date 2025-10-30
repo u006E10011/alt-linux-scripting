@@ -137,6 +137,7 @@ dispose()
     rm -rf /tmp/ospf.sh
     rm -rf /tmp/dhcpd.sh
     rm -rf hq-rtr.sh
+    history -c
 }
 
 init
