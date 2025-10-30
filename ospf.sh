@@ -1,5 +1,20 @@
 #!/bin/bash
 
+HOSTNAME=""
+
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--hostname)
+            HOSTNAME="$2"
+            shift 2
+            ;;
+        *)
+            echo "Unknown option: $1"
+            exit 1
+            ;;
+    esac
+done
+
 init()
 {
     local packages=("frr")
@@ -25,11 +40,13 @@ init()
 
 setup_config()
 {
-    read -p "Enter hostname (hq or br): " hostname
+    if [ -z "$HOSTNAME" ]; then
+        read -p "Enter hostname (hq or br): " HOSTNAME
+    fi
     
     local conf="frr version 9.0.2
 frr defaults traditional
-hostname $hostname
+hostname $HOSTNAME
 log file /var/log/frr/frr.log
 no ipv6 forwarding
 !
@@ -47,7 +64,7 @@ router ospf
  log-adjacency-changes
  passive-interface default"
 
-    case $hostname in
+    case $HOSTNAME in
         *hq*)
             conf="$conf
  network 10.10.10.0/30 area 0
@@ -60,7 +77,7 @@ router ospf
  network 172.20.10.0/28 area 0"
             ;;
         *)
-            echo "Unknown hostname: $hostname"
+            echo "Unknown hostname: $HOSTNAME"
             return 1
             ;;
     esac
@@ -72,6 +89,7 @@ exit
     sed -i 's/ospfd=no/ospfd=yes/' /etc/frr/daemons
     echo "$conf" > /etc/frr/frr.conf
     echo "$conf" > /etc/frr/frr.conf.sav
+    echo "FRR configured for host: $HOSTNAME"
 }
 
 main()
@@ -80,4 +98,4 @@ main()
     setup_config
 }
 
-main
+main "$@"
