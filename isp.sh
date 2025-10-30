@@ -71,6 +71,7 @@ setup_interface(){
 dispose()
 {
     rm -rf isp.sh
+    history -c
 }
 
 init
