@@ -111,12 +111,35 @@ setup_gre(){
     echo "$options" >> /etc/net/ifaces/gre1/options
 }
 
+setup_ospf()
+{
+    curl -s -o /tmp/ospf.sh "https://raw.githubusercontent.com/u006E100/alt-linux-scripting/main/ospf.sh"
+    chmod +x /tmp/ospf.sh
+    /tmp/ospf.sh --hostname "hq-rtr"
+}
+
+setup_dhcp()
+{
+    curl -s -o /tmp/dhcpd.sh "https://raw.githubusercontent.com/u006E100/alt-linux-scripting/main/dhcpd.sh"
+    chmod +x /tmp/dhcpd.sh
+    bash /tmp/dhcpd.sh
+}
+
 setup_all_network(){
     setup_interface
     setup_gre
+    setup_ospf
     systemctl restart network && ip -c a
+}
+
+dispose()
+{
+    rm -rf /tmp/ospf.sh
+    rm -rf /tmp/dhcpd.sh
+    rm -rf hq-rtr.sh
 }
 
 init
 setup_firewalld
 setup_all_network
+dispose
