@@ -129,6 +129,7 @@ setup_all_network(){
     setup_interface
     setup_gre
     setup_ospf
+    setup_dhcp
     systemctl restart network && ip -c a
 }
 
