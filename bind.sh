@@ -78,6 +78,7 @@ main()
     init
     import_config
     replace_config
+    history -c
 }
 
 main
