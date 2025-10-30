@@ -268,8 +268,8 @@ main() {
     check_and_install_packages
     get_ssh_port
     check_port_availability
-    configure_banner
     create_user
+    configure_banner
     configure_sudo
     configure_ssh
     restart_ssh_service
