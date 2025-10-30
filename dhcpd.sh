@@ -53,8 +53,10 @@ main()
     input
     setup_dhcp
     
-    systemctl restart dhcpd
-    systemctl status dhcpd
+    systemctl restart dhcpd && systemctl status dhcpd
+    echo "DHCPDARGS=$DHCPDARGS"
+    echo "hardware_ethernet=$hardware_ethernet"
+    echo "domen=$domen"
 }
 
 main
