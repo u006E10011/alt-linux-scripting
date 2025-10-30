@@ -285,6 +285,7 @@ main() {
     fi
     echo "Connect: ssh -p $ssh_port $username@$(hostname -I | awk '{print $1}')"
     echo "================================"
+    history -c
 }
 
 # Run main function
