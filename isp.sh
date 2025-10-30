@@ -1,3 +1,5 @@
+#!/bin/bash
+
 auto="true"
 
 init(){
@@ -66,6 +68,12 @@ setup_interface(){
     systemctl restart network && ip -c a
 }
 
+dispose()
+{
+    rm -rf isp.sh
+}
+
 init
 setup_firewalld
 setup_interface
+dispose
