@@ -31,14 +31,14 @@ init()
 
 input()
 {
-    read -p "domen [$domen]: " _domen
-    domen=${_domen:-$domen}
+    # read -p "domen [$domen]: " _domen
+    # domen=${_domen:-$domen}
 
-    read -p "hardware ethernet [$hardware_ethernet]: " _hardware_ethernet
-    hardware_ethernet=${_hardware_ethernet:-$hardware_ethernet}
+    # read -p "hardware ethernet [$hardware_ethernet]: " _hardware_ethernet
+    # hardware_ethernet=${_hardware_ethernet:-$hardware_ethernet}
 
-    read -p "DHCPDARGS [$DHCPDARGS]: " _DHCPDARGS
-    DHCPDARGS=${_DHCPDARGS:-$DHCPDARGS}
+    # read -p "DHCPDARGS [$DHCPDARGS]: " _DHCPDARGS
+    # DHCPDARGS=${_DHCPDARGS:-$DHCPDARGS}
 }
 
 setup_dhcp()
