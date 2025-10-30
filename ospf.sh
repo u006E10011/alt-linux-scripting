@@ -17,7 +17,7 @@ done
 
 init()
 {
-    local packages=("frr")
+    local packages=("frr" "sed")
     local missing_packages=()
     
     for package in "${packages[@]}"; do
