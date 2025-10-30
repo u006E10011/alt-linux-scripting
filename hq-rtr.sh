@@ -113,13 +113,13 @@ setup_gre(){
 
 setup_ospf()
 {
-    curl -s -O "https://raw.githubusercontent.com/u006E100/alt-linux-scripting/main/ospf.sh"
+    curl -O "https://raw.githubusercontent.com/u006E100/alt-linux-scripting/main/ospf.sh"
     bash ospf.sh --hostname "hq-rtr"
 }
 
 setup_dhcp()
 {
-    curl -s -O "https://raw.githubusercontent.com/u006E100/alt-linux-scripting/main/dhcpd.sh"
+    curl -O "https://raw.githubusercontent.com/u006E100/alt-linux-scripting/main/dhcpd.sh"
     bash dhcpd.sh
 }
 
