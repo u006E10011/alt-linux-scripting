@@ -63,11 +63,11 @@ setup_interface(){
     echo "$vlan200" > /etc/net/ifaces/vlan200/ipv4address
 
     options_vlan='BOOTPROTO=static
-    TYPE=vlan
-    HOST=enp7s2'
+TYPE=vlan
+HOST=enp7s2'
 
     options_eth='BOOTPROTO=static
-    TYPE=eth'
+TYPE=eth'
 
     echo "$options_vlan" > /etc/net/ifaces/vlan100/options
     echo "VID=100" >> /etc/net/ifaces/vlan100/options
