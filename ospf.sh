@@ -44,6 +44,8 @@ setup_config()
         read -p "Enter hostname (hq or br): " HOSTNAME
     fi
 
+    sed -i 's/ospfd=no/ospfd=yes/' /etc/frr/daemons
+
     case $HOSTNAME in
         *hq*)
             vtysh -c "configure terminal" \
@@ -86,7 +88,6 @@ setup_config()
 
     log "OSPF configuration completed for $machine_type"
 
-    sed -i 's/ospfd=no/ospfd=yes/' /etc/frr/daemons
     echo "FRR configured for host: $HOSTNAME"
     systemctl restart network firewalld frr && systemctl status frr --no-pager
 }
