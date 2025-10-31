@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DHCPDARGS="vlan100"
+DHCPDARGS="vlan200"
 hardware_ethernet="bc:24:11:e6:8e:e6"
 domen="au-team.irpo"
 
