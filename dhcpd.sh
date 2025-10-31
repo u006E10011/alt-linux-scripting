@@ -68,8 +68,8 @@ EOF
 
 main()
 {
-    init
     input
+    init
     setup_dhcp
     
     systemctl restart dhcpd && systemctl status dhcpd --no-pager
