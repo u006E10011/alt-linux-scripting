@@ -58,10 +58,10 @@ setup_interface(){
     echo "$enp7s2" > /etc/net/ifaces/enp7s2/ipv4address
 
     options='BOOTPROTO=static
-    TYPE=eth
-    DISABLED=no
-    SYSTEMD_BOOTPROTO=static
-    CONFIG_IPV4=yes'
+TYPE=eth
+DISABLED=no
+SYSTEMD_BOOTPROTO=static
+CONFIG_IPV4=yes'
 
     echo "$options" > /etc/net/ifaces/enp7s2/options
 }
