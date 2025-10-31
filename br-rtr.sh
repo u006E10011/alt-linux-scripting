@@ -96,8 +96,8 @@ TUNOPTIONS='\''ttl 64'\''
 TUNMTU=1476
 DISABLE=no'
 
-    echo "$_local" >> /etc/net/ifaces/gre1/options
-    echo "$_remote" >> /etc/net/ifaces/gre1/options
+    echo "LOCAL $_local" >> /etc/net/ifaces/gre1/options
+    echo "REMOTE $_remote" >> /etc/net/ifaces/gre1/options
     echo "$options" >> /etc/net/ifaces/gre1/options
 }
 
