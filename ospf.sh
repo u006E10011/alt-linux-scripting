@@ -90,6 +90,7 @@ exit
     echo "$conf" > /etc/frr/frr.conf
     echo "$conf" > /etc/frr/frr.conf.sav
     echo "FRR configured for host: $HOSTNAME"
+    systemctl restart frr && systemctl status dhcpd
 }
 
 main()
