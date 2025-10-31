@@ -43,38 +43,40 @@ setup_config()
     if [ -z "$HOSTNAME" ]; then
         read -p "Enter hostname (hq or br): " HOSTNAME
     fi
-    
-    local conf="frr version 9.0.2
-frr defaults traditional
-hostname $HOSTNAME
-log file /var/log/frr/frr.log
-no ipv6 forwarding
-!
-interface enp7s2
- no ip ospf passive
-exit
-!
-interface gre1
- ip ospf authentication
- ip ospf authentication-key P@ssw0rd
- no ip ospf passive
-exit
-!
-router ospf
- log-adjacency-changes
- passive-interface default"
 
     case $HOSTNAME in
         *hq*)
-            conf="$conf
- network 10.10.10.0/30 area 0
- network 192.168.100.0/27 area 0
- network 192.168.200.0/28 area 0"
+            vtysh -c "configure terminal" \
+              -c "router ospf" \
+              -c "passive-interface default" \
+              -c "network 10.10.10.0/30 area 0" \
+              -c "network 192.168.100.0/27 area 0" \
+              -c "network 192.168.200.0/28 area 0" \
+              -c "exit" \
+              -c "interface enp7s2.100" \
+              -c "no ip ospf passive" \
+              -c "interface gre1" \
+              -c "no ip ospf passive" \
+              -c "ip ospf authentication" \
+              -c "ip ospf authentication-key P@ssw0rd" \
+              -c "end" \
+              -c "write"
             ;;
         *br*)
-            conf="$conf
- network 10.10.10.0/30 area 0
- network 172.20.10.0/28 area 0"
+             vtysh -c "configure terminal" \
+              -c "router ospf" \
+              -c "passive-interface default" \
+              -c "network 10.10.10.0/30 area 0" \
+              -c "network 172.20.10.0/28 area 0" \
+              -c "exit" \
+              -c "interface gre1" \
+              -c "no ip ospf passive" \
+              -c "ip ospf authentication" \
+              -c "ip ospf authentication-key P@ssw0rd" \
+              -c "interface enp7s2" \
+              -c "no ip ospf passive" \
+              -c "end" \
+              -c "write"
             ;;
         *)
             echo "Unknown hostname: $HOSTNAME"
@@ -82,15 +84,11 @@ router ospf
             ;;
     esac
 
-    conf="$conf
-exit
-!"
+    log "OSPF configuration completed for $machine_type"
 
     sed -i 's/ospfd=no/ospfd=yes/' /etc/frr/daemons
-    echo "$conf" > /etc/frr/frr.conf
-    echo "$conf" > /etc/frr/frr.conf.sav
     echo "FRR configured for host: $HOSTNAME"
-    systemctl restart network firewalld frr && systemctl status frr
+    systemctl restart network firewalld frr && systemctl status frr --no-pager
 }
 
 main()
