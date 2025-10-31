@@ -36,6 +36,7 @@ init()
     else
         echo "All required packages are already installed"
     fi
+
 }
 
 setup_config()
@@ -45,6 +46,7 @@ setup_config()
     fi
 
     sed -i 's/ospfd=no/ospfd=yes/' /etc/frr/daemons
+    systemctl enable --now frr
 
     case $HOSTNAME in
         *hq*)
