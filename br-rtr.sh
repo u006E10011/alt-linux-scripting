@@ -103,7 +103,7 @@ setup_gre(){
 
 setup_ospf()
 {
-    curl -s -o /tmp/ospf.sh "https://raw.githubusercontent.com/u006E100/alt-linux-scripting/main/ospf.sh"
+    curl -s -o /tmp/ospf.sh "https://raw.githubusercontent.com/u006E10011/alt-linux-scripting/main/ospf.sh"
     chmod +x /tmp/ospf.sh
     /tmp/ospf.sh --hostname "br-rtr"
 }
