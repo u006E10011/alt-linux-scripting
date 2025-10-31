@@ -90,11 +90,11 @@ setup_gre(){
     echo "$gre" > /etc/net/ifaces/gre1/ipv4address
 
      options='TUNTYPE=gre
-    TYPE=iptun
-    TUNTTL=64
-    TUNOPTIONS='\''ttl 64'\''
-    TUNMTU=1476
-    DISABLE=no'
+TYPE=iptun
+TUNTTL=64
+TUNOPTIONS='\''ttl 64'\''
+TUNMTU=1476
+DISABLE=no'
 
     echo "$_local" >> /etc/net/ifaces/gre1/options
     echo "$_remote" >> /etc/net/ifaces/gre1/options
