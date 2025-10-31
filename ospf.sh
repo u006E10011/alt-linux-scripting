@@ -86,8 +86,6 @@ setup_config()
             ;;
     esac
 
-    log "OSPF configuration completed for $HOSTNAME"
-
     echo "FRR configured for host: $HOSTNAME"
     systemctl restart network firewalld frr && systemctl status frr --no-pager
 }
